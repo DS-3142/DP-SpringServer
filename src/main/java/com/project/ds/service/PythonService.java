@@ -14,7 +14,7 @@ public class PythonService {
     private final RestTemplate restTemplate;
 
     public PythonResponse requestSummary(String content) {
-        String url = "http://localhost:5000/summarize";
+        String url = "http://localhost:5000/api/papers/summarize";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
