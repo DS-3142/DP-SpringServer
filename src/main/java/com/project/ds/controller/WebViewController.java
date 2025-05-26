@@ -19,7 +19,7 @@ public class WebViewController {
     private final MeetingRecordService meetingRecordService;
 
     // 첫 진입 화면
-    @GetMapping("/home")
+    @GetMapping({"", "/"})
     public String showForm(Model model) {
         model.addAttribute("postRequest", new PostMeetingSummaryRequest("", ""));
         return "meeting";
@@ -57,6 +57,6 @@ public class WebViewController {
     ) {
         List<GetSearchConferenceResponse> conferences = meetingRecordService.searchConferencesByKeyword(title);
         model.addAttribute("conferences", conferences);
-        return "conference-detail";
+        return "conferenceDetail";
     }
 }

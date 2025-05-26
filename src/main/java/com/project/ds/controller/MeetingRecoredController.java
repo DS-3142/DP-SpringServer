@@ -18,7 +18,7 @@ public class MeetingRecoredController {
     private final MeetingRecordService meetingRecordService;
 
     @PostMapping("/summarize")
-    public ResponseEntity<PostMeetingSummaryResponse> summarize(@RequestBody PostMeetingSummaryRequest request) {
+    public ResponseEntity<PostMeetingSummaryResponse> summarize(@ModelAttribute PostMeetingSummaryRequest request) {
         return ResponseEntity.ok(meetingRecordService.summarizeAndSave(request));
     }
 

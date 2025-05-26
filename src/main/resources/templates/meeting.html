@@ -11,7 +11,8 @@
     <input type="text" id="title" name="title" required/><br/>
 
     <label for="content">회의 본문:</label><br/>
-    <textarea id="content" name="content" rows="10" cols="50" required></textarea><br/>
+    <textarea id="content" name="content" rows="20" cols="100" required
+              placeholder="회의 내용을 자유롭게 입력하세요. 글 길이에 제한은 없습니다."></textarea><br/>
 
     <button type="submit">요약 및 추천 요청</button>
 </form>
@@ -43,10 +44,17 @@
 
 <div th:if="${searchResults != null}">
     <h2>검색 결과</h2>
-    <ul>
-        <li th:each="conference : ${searchResults}">
-            <a th:href="@{'/conference/' + ${conference.title}}" th:text="${conference.title}"></a>
-            <p th:text="${conference.summary}"></p>
+
+    <div th:if="${searchResults.isEmpty()}">
+        <p>검색 결과가 없습니다.</p>
+    </div>
+
+    <ul th:if="${!searchResults.isEmpty()}">
+        <li th:each="conference : ${searchResults}" style="margin-bottom: 1em;">
+            <h3>
+                <a th:href="@{'/web/conference/' + ${conference.title}}" th:text="${conference.title}"></a>
+            </h3>
+            <p><strong>요약:</strong> <span th:text="${conference.summary}"></span></p>
         </li>
     </ul>
 </div>
