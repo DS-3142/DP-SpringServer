@@ -21,22 +21,6 @@ public class MeetingRecordService {
 
     public PostMeetingSummaryResponse summarizeAndSave(PostMeetingSummaryRequest request) {
         PythonResponse summary = pythonService.requestSummary(request.content());
-//        PythonResponse summary = new PythonResponse(
-//                "이 회의는 분산 시스템의 구조를 설계하는 데 중점을 두었습니다.",
-//                List.of("분산 시스템", "API 설계", "데이터 처리"),
-//                List.of(
-//                        new RecommendedPaper(
-//                                "On Distributed Systems Design",
-//                                "https://example.com/paper1",
-//                                "이 논문은 분산 시스템의 구성 요소와 통신 방법을 설명합니다."
-//                        ),
-//                        new RecommendedPaper(
-//                                "Scalable API Design in Practice",
-//                                "https://example.com/paper2",
-//                                "확장 가능한 API 설계를 위한 패턴과 안티패턴을 소개합니다."
-//                        )
-//                )
-//        );
 
         List<Conference> conferences = summary.recommendedPapers().stream()
                 .map(c -> Conference.builder()

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>회의 요약 및 논문 추천</title>
+</head>
+<body>
+<h1>회의 요약 생성</h1>
+<form th:action="@{/api/meeting/summarize}" method="post" th:object="${postRequest}">
+    <label for="title">회의 제목:</label>
+    <input type="text" id="title" name="title" required/><br/>
+
+    <label for="content">회의 본문:</label><br/>
+    <textarea id="content" name="content" rows="10" cols="50" required></textarea><br/>
+
+    <button type="submit">요약 및 추천 요청</button>
+</form>
+
+<h2>요약 결과</h2>
+<div th:if="${summaryResponse != null}">
+    <p><strong>제목:</strong> <span th:text="${summaryResponse.title}"></span></p>
+    <p><strong>요약:</strong> <span th:text="${summaryResponse.summary}"></span></p>
+    <p><strong>키워드:</strong>
+        <span th:each="keyword : ${summaryResponse.keywords}" th:text="keyword + ' '"></span>
+    </p>
+    <h3>추천 논문</h3>
+    <ul>
+        <li th:each="paper : ${summaryResponse.recommendedPapers}">
+            <a th:href="${paper.url}" th:text="${paper.title}" target="_blank"></a>
+            <p th:text="${paper.summary}"></p>
+        </li>
+    </ul>
+</div>
+
+<hr/>
+
+<h1>키워드 기반 회의 검색</h1>
+<form th:action="@{/api/meeting/search}" method="get">
+    <label for="keyword">검색 키워드:</label>
+    <input type="text" id="keyword" name="keyword" required/>
+    <button type="submit">검색</button>
+</form>
+
+<div th:if="${searchResults != null}">
+    <h2>검색 결과</h2>
+    <ul>
+        <li th:each="conference : ${searchResults}">
+            <a th:href="@{'/conference/' + ${conference.title}}" th:text="${conference.title}"></a>
+            <p th:text="${conference.summary}"></p>
+        </li>
+    </ul>
+</div>
+</body>
+</html>

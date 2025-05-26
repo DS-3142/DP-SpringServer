@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>회의 상세 정보</title>
+</head>
+<body>
+<h1>추천 논문 상세 보기</h1>
+<div th:if="${conferences != null}">
+    <ul>
+        <li th:each="conf : ${conferences}">
+            <h2 th:text="${conf.title}"></h2>
+            <p><strong>요약:</strong> <span th:text="${conf.summary}"></span></p>
+            <a th:href="${conf.url}" target="_blank">논문 링크</a>
+            <hr/>
+        </li>
+    </ul>
+</div>
+<a href="/">처음으로</a>
+</body>
+</html>
