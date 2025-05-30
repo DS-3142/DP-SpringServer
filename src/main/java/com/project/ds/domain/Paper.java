@@ -4,15 +4,15 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "conference")
+@Table(name = "paper")
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Conference {
+public class Paper {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "conference_id")
-    private Long conferenceId;
+    @Column(name = "paper_id")
+    private Long paperId;
 
     @Column(name = "title", nullable = false, length = 200)
     private String title;
@@ -25,11 +25,11 @@ public class Conference {
     private String summary;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "meeting_record_id", nullable = false)
-    private MeetingRecord meetingRecord;
+    @JoinColumn(name = "meeting_id", nullable = false)
+    private Meeting meeting;
 
     @Builder
-    public Conference(String title, String url, String summary) {
+    public Paper(String title, String url, String summary) {
         this.title = title;
         this.url = url;
         this.summary = summary;

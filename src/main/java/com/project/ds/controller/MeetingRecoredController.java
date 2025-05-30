@@ -3,7 +3,7 @@ package com.project.ds.controller;
 import com.project.ds.dto.request.PostMeetingSummaryRequest;
 import com.project.ds.dto.response.PostMeetingSummaryResponse;
 import com.project.ds.dto.response.GetSearchConferenceResponse;
-import com.project.ds.service.MeetingRecordService;
+import com.project.ds.service.MeetingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +15,7 @@ import java.util.List;
 @RequestMapping("/api/meeting")
 public class MeetingRecoredController {
 
-    private final MeetingRecordService meetingRecordService;
+    private final MeetingService meetingRecordService;
 
     @PostMapping("/summarize")
     public ResponseEntity<PostMeetingSummaryResponse> summarize(@ModelAttribute PostMeetingSummaryRequest request) {

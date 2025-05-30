@@ -7,15 +7,15 @@ import lombok.*;
 import java.util.List;
 
 @Entity
-@Table(name = "meeting_record")
+@Table(name = "meeting")
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MeetingRecord {
+public class Meeting {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "meeting_record_id")
-    private Long meetingRecordId;
+    @Column(name = "meeting_id")
+    private Long meetingId;
 
     @Column(name = "title", nullable = false, length = 200)
     private String title;
@@ -25,15 +25,15 @@ public class MeetingRecord {
     private String summary;
 
     @ElementCollection
-    @CollectionTable(name = "meeting_record_keywords", joinColumns = @JoinColumn(name = "meeting_record_id"))
+    @CollectionTable(name = "meeting_keyword", joinColumns = @JoinColumn(name = "meeting_id"))
     @Column(name = "keyword")
     private List<String> keywords;
 
-    @OneToMany(mappedBy = "meetingRecord", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Conference> conferences;
+    @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Paper> conferences;
 
     @Builder
-    public MeetingRecord(String title, String summary, List<String> keywords, List<Conference> conferences) {
+    public Meeting(String title, String summary, List<String> keywords, List<Paper> conferences) {
         this.title = title;
         this.summary = summary;
         this.keywords = keywords;
