@@ -13,14 +13,14 @@ import java.util.Map;
 public class PythonService {
     private final RestTemplate restTemplate;
 
-    public PythonResponse requestSummary(String content) {
-        String url = "http://localhost:5000/api/papers/inference";
+    public PythonResponse requestSummary(Long meetingId, String content) {
+        String url = "http://localhost:5001/api/meeting";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        Map<String, String> body = Map.of("content", content);
+        Map<String, Object> body = Map.of("meetingId", meetingId,"content", content);
 
-        HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
         ResponseEntity<PythonResponse> response = restTemplate.exchange(
                 url,

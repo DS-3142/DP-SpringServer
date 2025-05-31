@@ -1,11 +1,12 @@
 package com.project.ds.service;
 
+import com.project.ds.domain.InvertedIndex;
 import com.project.ds.domain.Paper;
 import com.project.ds.domain.Meeting;
+import com.project.ds.dto.SearchType;
 import com.project.ds.dto.request.PostMeetingSummaryRequest;
-import com.project.ds.dto.response.PostMeetingSummaryResponse;
-import com.project.ds.dto.response.GetSearchConferenceResponse;
-import com.project.ds.dto.response.PythonResponse;
+import com.project.ds.dto.response.*;
+import com.project.ds.repository.InvertedIndexRepository;
 import com.project.ds.repository.MeetingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,47 +17,79 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MeetingService {
     private final PythonService pythonService;
-    private final MeetingRepository meetingRecordRepository;
+    private final MeetingRepository meetingRepository;
+    private final InvertedIndexRepository invertedIndexRepository;
 
     public PostMeetingSummaryResponse summarizeAndSave(PostMeetingSummaryRequest request) {
-        PythonResponse summary = pythonService.requestSummary(request.content());
+        Meeting meeting = Meeting.from(request.title());
+        Meeting saved = meetingRepository.save(meeting);
 
-        List<Paper> conferences = summary.recommendedPapers().stream()
-                .map(c -> Paper.builder()
-                        .title(c.title())
-                        .url(c.url())
-                        .summary(c.summary())
-                        .build()
-                )
-                .toList();
+        PythonResponse pythonResponse = pythonService.requestSummary(saved.getMeetingId(), request.content());
 
-        Meeting record = Meeting.builder()
-                .title(request.title())
-                .summary(summary.summary())
-                .keywords(summary.keywords())
-                .conferences(conferences)
-                .build();
+        saved.setSummary(pythonResponse.summary());
+        saved.setKeywords(pythonResponse.keywords());
 
-        conferences.forEach(c -> c.setMeeting(record));
-        meetingRecordRepository.save(record);
+        meetingRepository.save(saved);
 
         return new PostMeetingSummaryResponse(
-                request.title(),
-                summary.summary(),
-                summary.keywords(),
-                summary.recommendedPapers()
+                saved.getMeetingId(),
+                saved.getTitle(),
+                saved.getSummary(),
+                saved.getKeywords()
         );
     }
 
     // 역색인 검색 기능
-    public List<GetSearchConferenceResponse> searchConferencesByKeyword(String keyword) {
-        List<Meeting> records = meetingRecordRepository.findByKeyword(keyword);
-        if (records.isEmpty()) {    // []빈 리스트를 클라이언트가 받으면 "검색 결과가 없습니다" 등의 메시지를 프론트에서 보여주도록
-            return List.of();
+    public List<GetSearchConferenceResponse> searchConferencesByKeyword(String keyword, SearchType type) {
+        List<Meeting> meetings;
+
+        if (type == SearchType.MEETING) {
+            // 회의록 요약 기반 검색
+            meetings = meetingRepository.findBySummaryContaining(keyword);
+        } else if (type == SearchType.PAPER) {
+            // 논문 키워드 역색인 기반 검색
+            List<InvertedIndex> indexMatches = invertedIndexRepository.findByPaperWordContainingIgnoreCase(keyword);
+            meetings = indexMatches.stream()
+                    .map(InvertedIndex::getMeeting)
+                    .distinct()
+                    .toList();
+        } else {
+            throw new IllegalArgumentException("Invalid search type. Use 'meeting' or 'paper'.");
         }
 
-        return records.stream()
-                .flatMap(r -> r.getConferences().stream())
-                .map(GetSearchConferenceResponse::of).toList();
+        return meetings.stream()
+                .map(GetSearchConferenceResponse::of)
+                .toList();
+    }
+
+    public void savePaper(Long meetingId, String title, String summary, String url) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid meeting ID"));
+
+        Paper paper = Paper.builder()
+                .title(title)
+                .summary(summary)
+                .url(url)
+                .meeting(meeting)
+                .build();
+
+        meeting.getPapers().add(paper);
+        meetingRepository.save(meeting);
+    }
+
+    public GetMeetingDetailResponse getMeetingDetail(Long meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid meeting ID"));
+
+        List<RecommendedPaper> paperDtos = meeting.getPapers().stream()
+                .map(p -> new RecommendedPaper(p.getTitle(), p.getUrl(), p.getSummary()))
+                .toList();
+
+        return new GetMeetingDetailResponse(
+                meeting.getTitle(),
+                meeting.getSummary(),
+                meeting.getKeywords(),
+                paperDtos
+        );
     }
 }

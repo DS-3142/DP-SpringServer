@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>회의 상세 보기</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to right, #e6f4ea, #f4fbf5);
+            margin: 40px;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #2e7d32;
+        }
+        label {
+            font-weight: bold;
+            color: #2e7d32;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 16px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #66bb6a;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #388e3c;
+        }
+        hr {
+            border: none;
+            border-top: 2px dashed #a5d6a7;
+            margin: 40px 0;
+        }
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        li {
+            background-color: #f1f8e9;
+            border: 1px solid #dcedc8;
+            padding: 16px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+        }
+        a {
+            color: #2e7d32;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<h1 th:text="${detail.title}">회의 제목</h1>
+<p><strong>요약:</strong> <span th:text="${detail.summary}"></span></p>
+<p><strong>키워드:</strong> <span th:text="${detail.keywords}"></span></p>
+
+<hr/>
+
+<h2>추천 논문 목록</h2>
+<ul th:if="${#lists.isEmpty(detail.recommendedPapers)}">
+    <li>추천된 논문이 없습니다.</li>
+</ul>
+<ul th:each="paper : ${detail.recommendedPapers}">
+    <li>
+        <a th:href="${paper.url}" th:text="${paper.title}" target="_blank"></a>
+        <p th:text="${paper.summary}"></p>
+    </li>
+</ul>
+
+<a href="/web" style="margin-top: 30px; display: block;">처음으로</a>
+
+</body>
+</html>

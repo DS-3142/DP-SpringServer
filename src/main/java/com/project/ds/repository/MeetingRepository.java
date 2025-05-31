@@ -10,6 +10,6 @@ import java.util.List;
 
 @Repository
 public interface MeetingRepository extends JpaRepository<Meeting, Long> {
-    @Query("SELECT mr FROM Meeting mr JOIN mr.keywords k WHERE k LIKE %:keyword%")
-    List<Meeting> findByKeyword(@Param("keyword") String keyword);
+    @Query("SELECT m FROM Meeting m WHERE m.summary LIKE %:keyword%")
+    List<Meeting> findBySummaryContaining(@Param("keyword") String keyword);
 }

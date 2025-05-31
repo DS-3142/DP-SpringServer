@@ -30,13 +30,22 @@ public class Meeting {
     private List<String> keywords;
 
     @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Paper> conferences;
+    private List<Paper> papers;
 
     @Builder
-    public Meeting(String title, String summary, List<String> keywords, List<Paper> conferences) {
+    private Meeting(String title, String summary, List<String> keywords, List<Paper> conferences) {
         this.title = title;
         this.summary = summary;
         this.keywords = keywords;
-        this.conferences = conferences;
+        this.papers = conferences;
+    }
+
+    public static Meeting from(String title) {
+        return Meeting.builder()
+                .title(title)
+                .summary("") // 기본값
+                .keywords(List.of()) // 기본값
+                .conferences(List.of()) // 기본값
+                .build();
     }
 }

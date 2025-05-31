@@ -3,60 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <title>회의 요약 및 논문 추천</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to right, #e6f4ea, #f4fbf5);
+            margin: 40px;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #2e7d32;
+        }
+        label {
+            font-weight: bold;
+            color: #2e7d32;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 16px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #66bb6a;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #388e3c;
+        }
+        hr {
+            border: none;
+            border-top: 2px dashed #a5d6a7;
+            margin: 40px 0;
+        }
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        li {
+            background-color: #f1f8e9;
+            border: 1px solid #dcedc8;
+            padding: 16px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+        }
+        a {
+            color: #2e7d32;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-<h1>회의 요약 생성</h1>
-<form th:action="@{/api/meeting/summarize}" method="post" th:object="${postRequest}">
-    <label for="title">회의 제목:</label>
-    <input type="text" id="title" name="title" required/><br/>
 
-    <label for="content">회의 본문:</label><br/>
-    <textarea id="content" name="content" rows="20" cols="100" required
-              placeholder="회의 내용을 자유롭게 입력하세요. 글 길이에 제한은 없습니다."></textarea><br/>
+<h1>회의 요약 생성</h1>
+<form th:action="@{/web/summarize}" method="post" th:object="${postRequest}">
+    <label for="title">회의 제목:</label>
+    <input type="text" id="title" name="title" required />
+
+    <label for="content">회의 본문:</label>
+    <textarea id="content" name="content" rows="12" placeholder="회의 내용을 자유롭게 입력하세요." required></textarea>
 
     <button type="submit">요약 및 추천 요청</button>
 </form>
+
+<hr/>
 
 <h2>요약 결과</h2>
 <div th:if="${summaryResponse != null}">
     <p><strong>제목:</strong> <span th:text="${summaryResponse.title}"></span></p>
     <p><strong>요약:</strong> <span th:text="${summaryResponse.summary}"></span></p>
-    <p><strong>키워드:</strong>
-        <span th:each="keyword : ${summaryResponse.keywords}" th:text="keyword + ' '"></span>
-    </p>
-    <h3>추천 논문</h3>
-    <ul>
-        <li th:each="paper : ${summaryResponse.recommendedPapers}">
-            <a th:href="${paper.url}" th:text="${paper.title}" target="_blank"></a>
-            <p th:text="${paper.summary}"></p>
-        </li>
-    </ul>
+    <p><strong>키워드:</strong> <span th:text="${keywordString}"></span></p>
+
+    <!-- 논문 비동기 요청 버튼 -->
+    <script th:inline="javascript">
+        const meetingId = [[${summaryResponse.meetingId}]];
+    </script>
+    <button type="button" onclick="loadPapers(meetingId)">논문 추천 결과 보기</button>
+    <ul id="paperList"></ul>
 </div>
 
 <hr/>
 
 <h1>키워드 기반 회의 검색</h1>
-<form th:action="@{/api/meeting/search}" method="get">
+<form id="searchForm" th:action="@{/web/search}" method="get">
     <label for="keyword">검색 키워드:</label>
-    <input type="text" id="keyword" name="keyword" required/>
+    <input type="text" id="keyword" name="keyword" required />
+    <select name="type">
+        <option value="MEETING">회의록</option>
+        <option value="PAPER">논문</option>
+    </select>
     <button type="submit">검색</button>
 </form>
 
 <div th:if="${searchResults != null}">
     <h2>검색 결과</h2>
-
     <div th:if="${searchResults.isEmpty()}">
         <p>검색 결과가 없습니다.</p>
     </div>
-
     <ul th:if="${!searchResults.isEmpty()}">
-        <li th:each="conference : ${searchResults}" style="margin-bottom: 1em;">
+        <li th:each="conference : ${searchResults}"
+            th:attr="data-meeting-id=${conference.meetingId}">
             <h3>
-                <a th:href="@{'/web/conference/' + ${conference.title}}" th:text="${conference.title}"></a>
+                <a th:href="@{'/web/conference/' + ${conference.meetingId}}"
+                   th:text="${conference.title}"></a>
             </h3>
             <p><strong>요약:</strong> <span th:text="${conference.summary}"></span></p>
         </li>
     </ul>
 </div>
+
+<script>
+    function loadPapers(meetingId) {
+        fetch("/api/meeting/results/" + meetingId)
+            .then(res => {
+                if (!res.ok) throw new Error("서버 오류 발생");
+                return res.json();
+            })
+            .then(data => {
+                const ul = document.getElementById("paperList");
+                ul.innerHTML = "";
+                if (!data.recommendedPapers || data.recommendedPapers.length === 0) {
+                    const li = document.createElement("li");
+                    li.textContent = "추천 논문이 아직 등록되지 않았습니다.";
+                    ul.appendChild(li);
+                    return;
+                }
+                data.recommendedPapers.forEach(paper => {
+                    const li = document.createElement("li");
+                    const a = document.createElement("a");
+                    a.href = paper.url;
+                    a.textContent = paper.title;
+                    a.target = "_blank";
+                    const summary = document.createElement("p");
+                    summary.textContent = paper.summary;
+                    li.appendChild(a);
+                    li.appendChild(summary);
+                    ul.appendChild(li);
+                });
+            })
+            .catch(err => {
+                alert("논문 로딩 실패: " + err.message);
+            });
+    }
+</script>
+
+<a href="/web" style="display: block; margin-top: 40px;">처음으로</a>
+
 </body>
 </html>

@@ -29,9 +29,10 @@ public class Paper {
     private Meeting meeting;
 
     @Builder
-    public Paper(String title, String url, String summary) {
+    public Paper(String title, String url, String summary, Meeting meeting) {
         this.title = title;
         this.url = url;
         this.summary = summary;
+        this.meeting = meeting;
     }
 }
