@@ -4,7 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "inverted_index")
+@Table(name = "inverted_index", indexes = {
+        @Index(name = "idx_paper_word", columnList = "paper_word"),
+        @Index(name = "idx_meeting_id", columnList = "meeting_id")
+})
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
