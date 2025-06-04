@@ -14,7 +14,7 @@ public class PythonService {
     private final RestTemplate restTemplate;
 
     public PythonResponse requestSummary(Long meetingId, String content) {
-        String url = "http://localhost:5001/api/meeting";
+        String url = "http://localhost:5001/api/papers/inference";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
